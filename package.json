@@ -9,10 +9,20 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@react-native-async-storage/async-storage": "2.1.2",
+    "@react-navigation/native": "^7.1.14",
+    "@react-navigation/stack": "^7.4.2",
     "expo": "~53.0.20",
+    "expo-barcode-scanner": "^13.0.1",
+    "expo-camera": "~16.1.11",
+    "expo-linear-gradient": "~14.1.5",
+    "expo-location": "~18.1.6",
     "expo-status-bar": "~2.2.3",
+    "firebase": "^12.0.0",
+    "haversine": "^1.1.1",
     "react": "19.0.0",
-    "react-native": "0.79.5"
+    "react-native": "0.79.5",
+    "expo-notifications": "~0.31.4"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
