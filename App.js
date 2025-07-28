@@ -5,7 +5,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from './firebaseConfig';
 import { ThemeProvider, useTheme } from './src/context/ThemeContext';
-import { exportToExcel, exportToPdf } from './src/utils/fileExporter';
+
 
 // Ekranları Import Et
 import LoginScreen from './src/screens/LoginScreen';
@@ -13,7 +13,10 @@ import EmployeeHomeScreen from './src/screens/EmployeeHomeScreen';
 import QRScannerScreen from './src/screens/QRScannerScreen';
 import AdminDashboardScreen from './src/screens/AdminDashboardScreen';
 import EmployeeDetailScreen from './src/screens/EmployeeDetailScreen';
-
+import StoreManagementScreen from './src/screens/StoreManagementScreen';
+import EditStoreScreen from './src/screens/EditStoreScreen';
+import ReportsScreen from './src/screens/ReportsScreen';
+import EmployeeHistoryScreen from './src/screens/EmployeeHistoryScreen';
 
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 
@@ -77,11 +80,15 @@ function App() {
                     <>
                         <Stack.Screen name="AdminDashboard" component={AdminDashboardScreen} options={{ headerShown: false }} />
                         <Stack.Screen name="EmployeeDetail" component={EmployeeDetailScreen} options={{ title: 'Çalışan Detayları' }} />
+                        <Stack.Screen name="StoreManagement" component={StoreManagementScreen} options={{ title: 'Mağaza Yönetimi' }} />
+                        <Stack.Screen name="EditStore" component={EditStoreScreen} />
+                        <Stack.Screen name="Reports" component={ReportsScreen} options={{ title: 'Raporlar' }} />
                     </>
                 ) : (
                     <>
                         <Stack.Screen name="EmployeeHome" component={EmployeeHomeScreen} options={{ headerShown: false }} />
                         <Stack.Screen name="QRScanner" component={QRScannerScreen} options={{ title: 'QR Kodu Tara' }} />
+                        <Stack.Screen name="EmployeeHistory" component={EmployeeHistoryScreen} options={{ title: 'Giriş/Çıkış Geçmişim' }} />
                     </>
                 )}
             </Stack.Navigator>
