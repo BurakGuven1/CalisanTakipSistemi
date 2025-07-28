@@ -89,6 +89,7 @@ export default function ReportsScreen({ route }) {
 
     const handleExport = (format) => {
         if (reportData.length === 0) { Alert.alert("Hata", "Dışa aktarılacak veri bulunmuyor."); return; }
+        const dataToExport = reportData.map(({ id, ...rest }) => rest);
         const selectedStore = stores.find(s => s.id === selectedStoreId);
         const title = `${selectedStore.name} - ${period === 'monthly' ? 'Aylık' : 'Haftalık'} Rapor`;
         if (format === 'excel') exportToExcel(reportData, title);
