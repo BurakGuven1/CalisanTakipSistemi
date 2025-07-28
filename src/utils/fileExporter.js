@@ -3,7 +3,6 @@ import * as Sharing from 'expo-sharing';
 import * as Print from 'expo-print';
 import * as XLSX from 'xlsx';
 
-// Excel'e Aktarma Fonksiyonu
 export const exportToExcel = async (data, fileName) => {
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
@@ -19,19 +18,22 @@ export const exportToExcel = async (data, fileName) => {
     });
 };
 
-// PDF'e Aktarma Fonksiyonu
-export const exportToPdf = async (data, storeName, period) => {
-    // Veriyi HTML tablosuna dönüştür
+export const exportToPdf = async (data, title) => {
+    // DÜZELTME: item.name yerine item["Çalışan Adı"] gibi doğru anahtarlar kullanıldı.
     const tableRows = data.map(item => `
         <tr>
-            <td>${item.name}</td>
-            <td>${item.totalHours} saat</td>
+            <td>${item["Çalışan Adı"]}</td>
+            <td>${item["Tarih"]}</td>
+            <td>${item["Giriş Saati"]}</td>
+            <td>${item["Çıkış Saati"]}</td>
+            <td>${item["Toplam Süre (saat)"]}</td>
         </tr>
     `).join('');
-
+    
     const htmlContent = `
         <html>
             <head>
+                <meta charset="UTF-8">
                 <style>
                     body { font-family: sans-serif; }
                     table { width: 100%; border-collapse: collapse; }
@@ -41,12 +43,15 @@ export const exportToPdf = async (data, storeName, period) => {
                 </style>
             </head>
             <body>
-                <h1>${storeName} - ${period} Raporu</h1>
+                <h1>${title}</h1>
                 <table>
                     <thead>
                         <tr>
                             <th>Çalışan Adı</th>
-                            <th>Toplam Çalışma Saati</th>
+                            <th>Tarih</th>
+                            <th>Giriş Saati</th>
+                            <th>Çıkış Saati</th>
+                            <th>Toplam Süre (saat)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -54,9 +59,8 @@ export const exportToPdf = async (data, storeName, period) => {
                     </tbody>
                 </table>
             </body>
-        </html>
-    `;
-
+        </html>`;
+        
     const { uri } = await Print.printToFileAsync({ html: htmlContent });
     await Sharing.shareAsync(uri, { mimeType: 'application/pdf', dialogTitle: 'PDF Raporunu Paylaş' });
 };
