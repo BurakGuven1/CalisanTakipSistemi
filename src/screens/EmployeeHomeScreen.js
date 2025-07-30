@@ -18,15 +18,16 @@ export default function EmployeeHomeScreen({ navigation }) {
 
         const userDocRef = doc(db, 'users', user.uid);
         getDoc(userDocRef).then(docSnap => {
-            if (docSnap.exists()) setUserName(docSnap.data().fullName);
+            if (docSnap.exists()) {
+                setUserName(docSnap.data().username);
+            }
         });
 
         const q = query(collection(db, 'checkIns'), where('userId', '==', user.uid), orderBy('timestamp', 'desc'), limit(1));
         unsubscribeRef.current = onSnapshot(q, (querySnapshot) => {
             if (!querySnapshot.empty) {
                 const data = querySnapshot.docs[0].data();
-                // DÜZELTME: Timestamp null olabilir, kontrol ekle
-                if (data.timestamp) {
+                if(data.timestamp) {
                     setLastCheck({ type: data.type, time: data.timestamp.toDate().toLocaleTimeString('tr-TR') });
                 }
             } else {
@@ -37,39 +38,42 @@ export default function EmployeeHomeScreen({ navigation }) {
     }, []);
 
     const handleLogout = () => {
-        if (unsubscribeRef.current) unsubscribeRef.current();
+        // Çıkış yapmadan ÖNCE dinleyiciyi durdur
+        if (unsubscribeRef.current) {
+            unsubscribeRef.current();
+        }
         signOut(auth);
     };
     
     const getButtonText = () => !lastCheck || lastCheck.type === 'out' ? 'Mağazaya Giriş Yap (QR Tara)' : 'Mağazadan Çıkış Yap (QR Tara)';
 
     return (
-        <LinearGradient colors={themeData.background === '#f8fafc' ? ['#f3f4f6', '#e5e7eb'] : ['#0f172a', '#1e293b']} style={[styles_employee.container, {backgroundColor: themeData.background}]}>
-            <View style={styles_employee.header}>
-                <Text style={[styles_employee.welcomeText, {color: themeData.subtext}]}>Hoş Geldin,</Text>
-                <Text style={[styles_employee.userName, {color: themeData.text}]}>{userName}</Text>
+        <LinearGradient colors={themeData.background === '#f8fafc' ? ['#f3f4f6', '#e5e7eb'] : ['#0f172a', '#1e293b']} style={[styles.container, {backgroundColor: themeData.background}]}>
+            <View style={styles.header}>
+                <Text style={[styles.welcomeText, {color: themeData.subtext}]}>Hoş Geldin,</Text>
+                <Text style={[styles.userName, {color: themeData.text}]}>{userName}</Text>
             </View>
-            <View style={[styles_employee.statusBox, {backgroundColor: themeData.card}]}>
-                <Text style={[styles_employee.statusTitle, {color: themeData.subtext}]}>Son İşlem Durumu</Text>
+            <View style={[styles.statusBox, {backgroundColor: themeData.card}]}>
+                <Text style={[styles.statusTitle, {color: themeData.subtext}]}>Son İşlem Durumu</Text>
                 {lastCheck ? (
-                    <Text style={[styles_employee.statusText, {color: themeData.primary}]}>{`${lastCheck.type === 'in' ? 'Giriş Yapıldı' : 'Çıkış Yapıldı'} - ${lastCheck.time}`}</Text>
+                    <Text style={[styles.statusText, {color: themeData.primary}]}>{`${lastCheck.type === 'in' ? 'Giriş Yapıldı' : 'Çıkış Yapıldı'} - ${lastCheck.time}`}</Text>
                 ) : (
-                    <Text style={[styles_employee.statusText, {color: themeData.primary}]}>Bugün hiç işlem yapılmadı.</Text>
+                    <Text style={[styles.statusText, {color: themeData.primary}]}>Bugün hiç işlem yapılmadı.</Text>
                 )}
             </View>
-            <TouchableOpacity style={styles_employee.scanButton} onPress={() => navigation.navigate('QRScanner')}>
-                <Text style={styles_employee.scanButtonText}>{getButtonText()}</Text>
+            <TouchableOpacity style={styles.scanButton} onPress={() => navigation.navigate('QRScanner')}>
+                <Text style={styles.scanButtonText}>{getButtonText()}</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles_employee.historyButton} onPress={() => navigation.navigate('EmployeeHistory')}>
-                <Text style={styles_employee.historyButtonText}>Giriş/Çıkış Geçmişim</Text>
+            <TouchableOpacity style={styles.historyButton} onPress={() => navigation.navigate('EmployeeHistory')}>
+                <Text style={styles.historyButtonText}>Giriş/Çıkış Geçmişim</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles_employee.logoutButton} onPress={handleLogout}>
-                <Text style={styles_employee.logoutButtonText}>Çıkış Yap</Text>
+            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+                <Text style={styles.logoutButtonText}>Çıkış Yap</Text>
             </TouchableOpacity>
         </LinearGradient>
     );
 }
-const styles_employee = StyleSheet.create({
+const styles = StyleSheet.create({
     container: { flex: 1, padding: 20, justifyContent: 'space-around' },
     header: { marginTop: 60, alignItems: 'center' },
     welcomeText: { fontSize: 24 },

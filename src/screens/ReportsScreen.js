@@ -68,7 +68,7 @@ export default function ReportsScreen({ route }) {
                     }
                     return Object.keys(dailyWork).map(date => ({
                         id: `${employee.id}-${date}`,
-                        "Çalışan Adı": employee.fullName,
+                        "Çalışan Adı": employee.username,
                         "Tarih": date,
                         "Giriş Saati": dailyWork[date].checkIn.toLocaleTimeString('tr-TR'),
                         "Çıkış Saati": dailyWork[date].checkOut.toLocaleTimeString('tr-TR'),

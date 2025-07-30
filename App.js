@@ -9,6 +9,9 @@ import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 
 // Ekranları Import Et
 import LoginScreen from './src/screens/LoginScreen';
+import AuthChoiceScreen from './src/screens/AuthChoiceScreen';
+import AdminSignUpScreen from './src/screens/AdminSignUpScreen';
+import SignUpScreen from './src/screens/SignUpScreen';
 import EmployeeHomeScreen from './src/screens/EmployeeHomeScreen';
 import QRScannerScreen from './src/screens/QRScannerScreen';
 import AdminDashboardScreen from './src/screens/AdminDashboardScreen';
@@ -72,10 +75,15 @@ function App() {
                     headerStyle: { backgroundColor: themeData.header },
                     headerTintColor: themeData.headerText,
                     headerTitleStyle: { fontWeight: 'bold' },
-                }}
-            >
+                }}>
+
                 {!user ? (
-                    <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+                    <>
+                        <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+                        <Stack.Screen name="AuthChoice" component={AuthChoiceScreen} options={{ title: 'Kayıt Türünü Seçin' }} />
+                        <Stack.Screen name="AdminSignUp" component={AdminSignUpScreen} options={{ title: 'Yönetici Kaydı' }} />
+                        <Stack.Screen name="SignUp" component={SignUpScreen} options={{ title: 'Çalışan Kaydı' }} />
+                    </>
                 ) : userRole === 'admin' ? (
                     <>
                         <Stack.Screen name="AdminDashboard" component={AdminDashboardScreen} options={{ headerShown: false }} />

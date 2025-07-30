@@ -11,13 +11,15 @@ export default function AdminDashboardScreen({ navigation }) {
     const [loading, setLoading] = useState(true);
     const [stores, setStores] = useState([]);
     const [selectedStoreId, setSelectedStoreId] = useState(null);
-    const unsubscribeRef = useRef(null);
+    const employeeUnsubscribeRef = useRef(null);
+    const adminUnsubscribeRef = useRef(null); // YENİ: Admin dinleyicisi için ref
 
     useEffect(() => {
         const user = auth.currentUser;
         if (!user) return;
+
         const adminDocRef = doc(db, 'users', user.uid);
-        getDoc(adminDocRef).then(async (adminDoc) => {
+        adminUnsubscribeRef.current = onSnapshot(adminDocRef, async (adminDoc) => {
             if (adminDoc.exists() && adminDoc.data().storeIds) {
                 const storeIds = adminDoc.data().storeIds;
                 const storesData = [];
@@ -26,18 +28,28 @@ export default function AdminDashboardScreen({ navigation }) {
                     if (storeDoc.exists()) storesData.push({ id: storeDoc.id, ...storeDoc.data() });
                 }
                 setStores(storesData);
-                if (storesData.length > 0) setSelectedStoreId(storesData[0].id);
-                else setLoading(false);
-            } else setLoading(false);
+                
+                if (!storeIds.includes(selectedStoreId)) {
+                    setSelectedStoreId(storeIds.length > 0 ? storeIds[0] : null);
+                }
+            } else {
+                setStores([]);
+                setSelectedStoreId(null);
+            }
         });
+
+        return () => {
+            if (adminUnsubscribeRef.current) adminUnsubscribeRef.current();
+        };
     }, []);
 
     useEffect(() => {
-        if (unsubscribeRef.current) unsubscribeRef.current();
+        if (employeeUnsubscribeRef.current) employeeUnsubscribeRef.current();
         if (!selectedStoreId) { setEmployees([]); setLoading(false); return; };
+        
         setLoading(true);
         const q = query(collection(db, 'users'), where('role', '==', 'employee'), where('storeId', '==', selectedStoreId));
-        unsubscribeRef.current = onSnapshot(q, async (querySnapshot) => {
+        employeeUnsubscribeRef.current = onSnapshot(q, async (querySnapshot) => {
             const employeesData = await Promise.all(querySnapshot.docs.map(async (userDoc) => {
                 const employee = { id: userDoc.id, ...userDoc.data() };
                 const lastCheckQuery = query(collection(db, 'checkIns'), where('userId', '==', userDoc.id), orderBy('timestamp', 'desc'), limit(1));
@@ -52,18 +64,23 @@ export default function AdminDashboardScreen({ navigation }) {
             Alert.alert("Hata", "Çalışan verileri yüklenemedi. Lütfen Firestore indekslerinizi kontrol edin.");
             setLoading(false);
         });
-        return () => { if (unsubscribeRef.current) unsubscribeRef.current(); };
+        return () => { if (employeeUnsubscribeRef.current) employeeUnsubscribeRef.current(); };
     }, [selectedStoreId]);
     
     const handleLogout = () => {
-        if (unsubscribeRef.current) unsubscribeRef.current();
+        // Çıkış yapmadan ÖNCE tüm dinleyicileri durdur
+        if (adminUnsubscribeRef.current) adminUnsubscribeRef.current();
+        if (employeeUnsubscribeRef.current) employeeUnsubscribeRef.current();
         signOut(auth);
     };
 
     const renderItem = ({ item }) => (
-        <TouchableOpacity style={[styles.itemContainer, { backgroundColor: themeData.card }]} onPress={() => navigation.navigate('EmployeeDetail', { employeeId: item.id, employeeName: item.fullName })}>
+        <TouchableOpacity 
+            style={[styles.itemContainer, { backgroundColor: themeData.card }]}
+            onPress={() => navigation.navigate('EmployeeDetail', { employeeId: item.id, employeeName: item.username })}
+        >
             <View>
-                <Text style={[styles.itemName, { color: themeData.text }]}>{item.fullName}</Text>
+                <Text style={[styles.itemName, { color: themeData.text }]}>{item.username}</Text>
                 <Text style={[styles.itemEmail, { color: themeData.subtext }]}>{item.email}</Text>
             </View>
             <View style={[styles.statusIndicator, item.lastStatus === 'in' ? styles.statusIn : styles.statusOut]}>
@@ -89,7 +106,6 @@ export default function AdminDashboardScreen({ navigation }) {
                     ))}
                 </ScrollView>
             </View>
-            {/* YENİ YÖNETİM BUTONLARI */}
             <View style={styles.managementButtons}>
                 <TouchableOpacity style={styles.managementButton} onPress={() => navigation.navigate('StoreManagement')}><Text style={styles.managementButtonText}>Mağazaları Yönet</Text></TouchableOpacity>
                 <TouchableOpacity style={styles.managementButton} onPress={() => navigation.navigate('Reports', { stores: stores })}><Text style={styles.managementButtonText}>Raporlar</Text></TouchableOpacity>
